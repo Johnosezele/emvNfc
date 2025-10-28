@@ -54,6 +54,17 @@ These classes are reusable from both the CLI and the Android app.
 ### Android App (Task 2)
 The `app` module currently contains the Empty Activity scaffold from Android Studio. NFC reader functionality will be implemented after Task 1 is finalized.
 
+### JVM Unit Tests
+To run the parser/interpretation tests (covers success paths, malformed TLVs, invalid hex, and multi-byte tags):
+
+```bash
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+export PATH="$JAVA_HOME/bin:$PATH"
+./gradlew :parser:test
+```
+
+If `JAVA_HOME` is not configured, Gradle will exit with `Unable to locate a Java Runtime` before tests execute. Rerun after exporting the Android Studio JDK or another JDK 17+.
+
 ## Example Input & Output
 
 ### Spec TLV & Error Handling
