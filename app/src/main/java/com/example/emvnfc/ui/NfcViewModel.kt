@@ -2,8 +2,8 @@ package com.example.emvnfc.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.emvnfc.data.InMemoryLogRepository
 import com.example.emvnfc.data.LogRepository
+import com.example.emvnfc.data.InMemoryLogRepository
 import com.example.emvnfc.model.EmvLogEntry
 import com.example.emvnfc.model.LogField
 import com.example.emvnfc.model.LogSource
