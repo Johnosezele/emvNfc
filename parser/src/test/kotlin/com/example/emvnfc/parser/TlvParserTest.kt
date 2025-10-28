@@ -54,6 +54,18 @@ class TlvParserTest {
     }
 
     @Test
+    fun `unknown tags fall back to hex interpretation`() {
+        val input = "DF0102A1B2"
+
+        val parsed = TlvParser.parse(input)
+        val interpreted = TagInterpreter.interpretAll(parsed)
+
+        assertEquals(1, interpreted.size)
+        assertEquals("DF01", interpreted[0].tlv.tag)
+        assertEquals("A1B2", interpreted[0].interpretation)
+    }
+
+    @Test
     fun `supports multi byte tag parsing`() {
         val input = "9F1A020123"
 
