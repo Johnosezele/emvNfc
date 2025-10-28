@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.emvnfc.parser.TlvParserTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-10-28T12:10:07.934Z" hostname="MacBookPro" time="0.107">
+<testsuite name="com.example.emvnfc.parser.TlvParserTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2025-10-28T12:34:14.483Z" hostname="MacBookPro" time="0.109">
   <properties/>
-  <testcase name="supports multi byte tag parsing()" classname="com.example.emvnfc.parser.TlvParserTest" time="0.064"/>
-  <testcase name="throws when hex input is invalid()" classname="com.example.emvnfc.parser.TlvParserTest" time="0.014"/>
-  <testcase name="throws when declared length exceeds bytes()" classname="com.example.emvnfc.parser.TlvParserTest" time="0.002"/>
-  <testcase name="interpretation formats amount and masks pan()" classname="com.example.emvnfc.parser.TlvParserTest" time="0.016"/>
+  <testcase name="supports multi byte tag parsing()" classname="com.example.emvnfc.parser.TlvParserTest" time="0.068"/>
+  <testcase name="throws when hex input is invalid()" classname="com.example.emvnfc.parser.TlvParserTest" time="0.017"/>
+  <testcase name="throws when declared length exceeds bytes()" classname="com.example.emvnfc.parser.TlvParserTest" time="0.003"/>
+  <testcase name="unknown tags fall back to hex interpretation()" classname="com.example.emvnfc.parser.TlvParserTest" time="0.006"/>
+  <testcase name="interpretation formats amount and masks pan()" classname="com.example.emvnfc.parser.TlvParserTest" time="0.005"/>
   <testcase name="parse valid tlv sequence()" classname="com.example.emvnfc.parser.TlvParserTest" time="0.002"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
