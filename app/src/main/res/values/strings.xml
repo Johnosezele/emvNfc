@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">EmvNfc</string>
+    <string name="share_logs">Share logs</string>
+    <string name="load_sample">Load sample TLV</string>
+    <string name="clear_logs">Clear logs</string>
+    <string name="no_logs">No EMV logs yet.</string>
+    <string name="nfc_unavailable">NFC hardware not available. Use sample mode.</string>
+    <string name="status_idle">Idle</string>
+    <string name="status_waiting">Hold card near the device</string>
+    <string name="status_reading">Reading card…</string>
+    <string name="status_completed">Log captured</string>
+    <string name="status_error">Read error</string>
 </resources>
