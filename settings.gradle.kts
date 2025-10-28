@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "EmvNfc"
 include(":app")
+include(":parser")
