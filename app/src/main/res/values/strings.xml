@@ -10,4 +10,7 @@
     <string name="status_reading">Reading card…</string>
     <string name="status_completed">Log captured</string>
     <string name="status_error">Read error</string>
+    <string name="verbose_on">Verbose TLV mode is ON</string>
+    <string name="verbose_off">Enable verbose TLV mode</string>
+    <string name="verbose_header">Latest TLV breakdown</string>
 </resources>

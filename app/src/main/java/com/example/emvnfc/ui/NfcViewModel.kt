@@ -33,7 +33,9 @@ data class ReaderUiState(
     val status: ReaderStatus = ReaderStatus.Idle,
     val logs: List<EmvLogEntry> = emptyList(),
     val message: String? = null,
-    val nfcAvailable: Boolean = true
+    val nfcAvailable: Boolean = true,
+    val verbose: Boolean = false,
+    val latestTlvDump: List<LogField> = emptyList()
 )
 
 class NfcViewModel(
@@ -105,8 +107,18 @@ class NfcViewModel(
         viewModelScope.launch {
             repository.clear()
             _uiState.update {
-                it.copy(status = ReaderStatus.WaitingForCard, message = null)
+                it.copy(status = ReaderStatus.WaitingForCard, message = null, latestTlvDump = emptyList())
             }
+        }
+    }
+
+    fun toggleVerbose() {
+        _uiState.update {
+            val nextVerbose = !it.verbose
+            it.copy(
+                verbose = nextVerbose,
+                latestTlvDump = if (nextVerbose) it.latestTlvDump else emptyList()
+            )
         }
     }
 
@@ -129,12 +141,16 @@ class NfcViewModel(
 
     private suspend fun persistLogFromHex(hex: String, source: LogSource) {
         runCatching {
-            val entry = buildLogEntry(hex, source)
+            val (entry, fields) = buildLogEntry(hex, source)
             repository.append(entry)
-            entry
-        }.onSuccess {
+            fields to entry
+        }.onSuccess { (fields, entry) ->
             _uiState.update { state ->
-                state.copy(status = ReaderStatus.Completed, message = null)
+                state.copy(
+                    status = ReaderStatus.Completed,
+                    message = null,
+                    latestTlvDump = if (state.verbose) fields else state.latestTlvDump
+                )
             }
         }.onFailure { throwable ->
             _uiState.update { state ->
@@ -143,7 +159,7 @@ class NfcViewModel(
         }
     }
 
-    private fun buildLogEntry(hex: String, source: LogSource): EmvLogEntry {
+    private fun buildLogEntry(hex: String, source: LogSource): Pair<EmvLogEntry, List<LogField>> {
         val tlvs = TlvParser.parse(hex)
         val interpreted = TagInterpreter.interpretAll(tlvs)
         val fields = interpreted
@@ -158,11 +174,18 @@ class NfcViewModel(
         if (fields.isEmpty()) {
             throw IllegalStateException("No supported tags found in TLV response")
         }
-        return EmvLogEntry(
+        val entry = EmvLogEntry(
             timestampMillis = timeProvider(),
             source = source,
             fields = fields
         )
+        return entry to interpreted.map { interpretedField ->
+            LogField(
+                tag = interpretedField.tlv.tag.uppercase(),
+                rawHex = interpretedField.tlv.hexValue,
+                interpretation = interpretedField.interpretation
+            )
+        }
     }
 
     companion object {

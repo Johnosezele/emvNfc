@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -86,6 +87,37 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
+private fun VerboseToggleRow(checked: Boolean, onToggle: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Checkbox(checked = checked, onCheckedChange = { onToggle() })
+        Text(text = if (checked) stringResource(id = R.string.verbose_on) else stringResource(id = R.string.verbose_off))
+    }
+}
+
+@Composable
+private fun VerboseTlvCard(fields: List<LogField>) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(text = stringResource(id = R.string.verbose_header), style = MaterialTheme.typography.titleSmall)
+            fields.forEach { field ->
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(text = "Tag ${field.tag}", style = MaterialTheme.typography.labelSmall)
+                    Text(text = field.interpretation, style = MaterialTheme.typography.bodyMedium)
+                    Text(text = "Hex: ${field.rawHex}", style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun EmvNfcApp(viewModel: NfcViewModel, readerManager: NfcReaderManager) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -140,6 +172,13 @@ fun EmvNfcApp(viewModel: NfcViewModel, readerManager: NfcReaderManager) {
                         }
                     }
                 )
+                VerboseToggleRow(
+                    checked = uiState.verbose,
+                    onToggle = { viewModel.toggleVerbose() }
+                )
+                if (uiState.verbose && uiState.latestTlvDump.isNotEmpty()) {
+                    VerboseTlvCard(uiState.latestTlvDump)
+                }
                 LogList(uiState.logs)
             }
         }
