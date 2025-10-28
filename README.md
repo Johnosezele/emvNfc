@@ -129,3 +129,7 @@ You can further test decoded, interpreted tags (e.g., `9F02`, `5A`, `9F26`, `9F1
 3. **PAN masking:** The CLI displays masked PANs (`6 leading / 4 trailing digits`), ensuring sensitive data is obscured.
 4. **Unicode bullet mask:** The middle digits are replaced with Unicode bullet characters (`•`) for clarity in logs/CLI output.
 
+
+## APK
+https://drive.google.com/file/d/1yo4EccJoE8pvGImyA41Xl7JTq7YIv-hc/view?usp=sharing
+
