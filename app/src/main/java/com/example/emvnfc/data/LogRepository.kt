@@ -64,38 +64,40 @@ class FileLogRepository(context: Context) : LogRepository {
 
     override fun logFile(): File? = if (file.exists()) file else null
 
-    private fun loadFromDisk(): List<EmvLogEntry> = runCatching {
+    private fun loadFromDisk(): List<EmvLogEntry> {
         if (!file.exists()) return emptyList()
-        val text = file.readText()
+        val text = runCatching { file.readText() }.getOrElse { return emptyList() }
         if (text.isBlank()) return emptyList()
-        val array = JSONArray(text)
-        buildList {
-            for (i in 0 until array.length()) {
-                val obj = array.getJSONObject(i)
-                val fieldsArray = obj.getJSONArray("fields")
-                val fields = buildList {
-                    for (j in 0 until fieldsArray.length()) {
-                        val fieldObj = fieldsArray.getJSONObject(j)
-                        add(
-                            LogField(
-                                tag = fieldObj.getString("tag"),
-                                rawHex = fieldObj.getString("rawHex"),
-                                interpretation = fieldObj.getString("interpretation")
+        return runCatching {
+            val array = JSONArray(text)
+            buildList {
+                for (i in 0 until array.length()) {
+                    val obj = array.getJSONObject(i)
+                    val fieldsArray = obj.getJSONArray("fields")
+                    val fields = buildList {
+                        for (j in 0 until fieldsArray.length()) {
+                            val fieldObj = fieldsArray.getJSONObject(j)
+                            add(
+                                LogField(
+                                    tag = fieldObj.getString("tag"),
+                                    rawHex = fieldObj.getString("rawHex"),
+                                    interpretation = fieldObj.getString("interpretation")
+                                )
                             )
-                        )
+                        }
                     }
-                }
-                add(
-                    EmvLogEntry(
-                        id = obj.optString("id"),
-                        timestampMillis = obj.getLong("timestamp"),
-                        source = LogSource.valueOf(obj.getString("source")),
-                        fields = fields
+                    add(
+                        EmvLogEntry(
+                            id = obj.optString("id"),
+                            timestampMillis = obj.getLong("timestamp"),
+                            source = LogSource.valueOf(obj.getString("source")),
+                            fields = fields
+                        )
                     )
-                )
+                }
             }
-        }
-    }.getOrElse { emptyList() }
+        }.getOrElse { emptyList() }
+    }
 
     private fun persist(entries: List<EmvLogEntry>) {
         runCatching {
@@ -124,6 +126,8 @@ class FileLogRepository(context: Context) : LogRepository {
                 )
             }
             file.writeText(array.toString())
+        }.onFailure {
+            // Swallow persistence errors; they will surface on next load attempt.
         }
     }
 }

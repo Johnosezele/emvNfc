@@ -1,9 +1,11 @@
 package com.example.emvnfc.ui
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.emvnfc.data.FileLogRepository
 import com.example.emvnfc.data.LogRepository
-import com.example.emvnfc.data.InMemoryLogRepository
 import com.example.emvnfc.model.EmvLogEntry
 import com.example.emvnfc.model.LogField
 import com.example.emvnfc.model.LogSource
@@ -35,7 +37,7 @@ data class ReaderUiState(
 )
 
 class NfcViewModel(
-    private val repository: LogRepository = InMemoryLogRepository(),
+    private val repository: LogRepository,
     private val timeProvider: () -> Long = { System.currentTimeMillis() }
 ) : ViewModel() {
 
@@ -108,6 +110,8 @@ class NfcViewModel(
         }
     }
 
+    fun logFile() = repository.logFile()
+
     fun buildShareText(): String? {
         val entries = _uiState.value.logs
         if (entries.isEmpty()) return null
@@ -159,5 +163,15 @@ class NfcViewModel(
             source = source,
             fields = fields
         )
+    }
+
+    companion object {
+        fun factory(context: Context): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val repository = FileLogRepository(context.applicationContext)
+                @Suppress("UNCHECKED_CAST")
+                return NfcViewModel(repository) as T
+            }
+        }
     }
 }

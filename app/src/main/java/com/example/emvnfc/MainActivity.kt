@@ -1,5 +1,6 @@
 package com.example.emvnfc
 
+import android.content.ClipData
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.os.Bundle
@@ -37,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import com.example.emvnfc.data.SampleTlvProvider
 import com.example.emvnfc.model.EmvLogEntry
 import com.example.emvnfc.model.LogField
@@ -51,7 +53,9 @@ import kotlinx.coroutines.MainScope
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: NfcViewModel by viewModels()
+    private val viewModel: NfcViewModel by viewModels {
+        NfcViewModel.factory(applicationContext)
+    }
     private val activityScope = MainScope()
 
     private val readerManager by lazy {
@@ -106,16 +110,33 @@ fun EmvNfcApp(viewModel: NfcViewModel, readerManager: NfcReaderManager) {
             ) {
                 StatusCard(uiState)
                 ActionRow(
-                    enabled = uiState.nfcAvailable,
+                    nfcEnabled = uiState.nfcAvailable,
+                    hasLogs = uiState.logs.isNotEmpty(),
                     onSample = { viewModel.ingestSample(SampleTlvProvider.purchaseRecord) },
                     onClear = { viewModel.clearLogs() },
                     onShare = {
-                        viewModel.buildShareText()?.let { shareText ->
-                            val intent = Intent(Intent.ACTION_SEND).apply {
-                                type = "text/plain"
-                                putExtra(Intent.EXTRA_TEXT, shareText)
+                        val logFile = viewModel.logFile()
+                        if (logFile != null) {
+                            val uri = FileProvider.getUriForFile(
+                                context,
+                                "${context.packageName}.fileprovider",
+                                logFile
+                            )
+                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                type = "application/json"
+                                putExtra(Intent.EXTRA_STREAM, uri)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                clipData = android.content.ClipData.newUri(context.contentResolver, "logs", uri)
                             }
-                            context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_logs)))
+                            context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_logs)))
+                        } else {
+                            viewModel.buildShareText()?.let { shareText ->
+                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_TEXT, shareText)
+                                }
+                                context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_logs)))
+                            }
                         }
                     }
                 )
@@ -165,7 +186,8 @@ private fun StatusCard(uiState: ReaderUiState) {
 
 @Composable
 private fun ActionRow(
-    enabled: Boolean,
+    nfcEnabled: Boolean,
+    hasLogs: Boolean,
     onSample: () -> Unit,
     onClear: () -> Unit,
     onShare: () -> Unit
@@ -177,10 +199,10 @@ private fun ActionRow(
         Button(onClick = onSample) {
             Text(text = stringResource(id = R.string.load_sample))
         }
-        Button(onClick = onClear, enabled = enabled) {
+        Button(onClick = onClear, enabled = nfcEnabled) {
             Text(text = stringResource(id = R.string.clear_logs))
         }
-        Button(onClick = onShare, enabled = enabled) {
+        Button(onClick = onShare, enabled = hasLogs) {
             Text(text = stringResource(id = R.string.share_logs))
         }
     }
