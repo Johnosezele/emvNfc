@@ -1,5 +1,9 @@
 # EMV TLV Parser & Android NFC Logger
 
+Pixel 7_pro Emulator
+<img width="405" height="851" alt="Screenshot 2025-10-28 at 4 16 30 PM" src="https://github.com/user-attachments/assets/da880838-9447-45e1-8117-9de436189450" />
+
+
 ## Overview
 This repository houses the assessment deliverables for the EMV TLV parser (Task 1) and the upcoming Android NFC logger (Task 2). A shared `parser` module contains the reusable BER-TLV decoding and EMV interpretation logic that powers both the CLI tool and, later, the Android app.
 
@@ -43,6 +47,9 @@ To see a successful parse, run the CLI with a corrected TLV string (length field
 ```bash
 ./gradlew :cli-tool:run --args "6F188407A0000000031010A50D500B5649534120435245444954"
 ```
+
+<img width="873" height="129" alt="Screenshot 2025-10-28 at 4 18 30 PM" src="https://github.com/user-attachments/assets/4b1a448e-9568-4b69-b24f-5762cde6b54e" />
+
 
 ### Parser Library
 The `parser` module exposes:
